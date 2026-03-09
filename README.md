@@ -1,2 +1,2 @@
-# portfolio-dashboard
-Portfolio dashboard / live holdings analytics - pulling T212 / QuickFS data
+# portfolio-performance
+MVP for stock portfolio performance tracker (XIRR, S&P 500 XIRR, Delta)
