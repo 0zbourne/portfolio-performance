@@ -1,5 +1,7 @@
 streamlit
 pandas
 numpy
+numpy-financial
 requests
 yfinance
+altair
