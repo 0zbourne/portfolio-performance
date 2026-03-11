@@ -119,7 +119,7 @@ chart = alt.Chart(melted).mark_line().encode(
     tooltip=["date:T", "Series:N", alt.Tooltip("Index:Q", format=".1f")]
 ).properties(height=350)
 
-st.altair_chart(chart, use_container_width=True)
+st.altair_chart(chart, width="stretch")
 
 # ---- Sidebar: Backfill Trigger ----
 with st.sidebar:
