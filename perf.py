@@ -114,45 +114,58 @@ def max_drawdown(nav: pd.Series) -> float:
 def xirr(nav: pd.Series, flows: pd.DataFrame) -> float:
     """
     Internal rate of return for irregular cash flows.
-    Uses numpy_financial.irr with dates converted to years.
+    If no external flows, calculates simple CAGR.
     """
-    if nav is None or len(nav) == 0:
+    if nav is None or len(nav) < 2:
         return np.nan
     
-    # Build cash flow series: deposits (negative), withdrawals (positive), final NAV (positive)
+    # Build cash flow series
     cash_flows = []
     
+    # Add initial NAV as negative cash flow (what you "invested" at start)
+    initial_date = nav.index[0]
+    initial_nav = float(nav.iloc[0])
+    
+    # Add external cash flows if any
     if flows is not None and not flows.empty:
         for _, row in flows.iterrows():
             date = pd.to_datetime(row["date"])
-            amount = float(row["amount_gbp"])
+            amount = float(row["amount_gbp"]) if pd.notna(row["amount_gbp"]) else 0.0
             # Deposit = negative (money out of your pocket)
             # Withdrawal = positive (money into your pocket)
-            cash_flows.append((date, -amount))
+            if amount != 0:
+                cash_flows.append((date, -amount))
     
     # Add final NAV as positive cash flow (what you'd get if you sold everything)
     final_date = nav.index[-1]
     final_nav = float(nav.iloc[-1])
     cash_flows.append((pd.to_datetime(final_date), final_nav))
     
-    if len(cash_flows) < 2:
+    if len(cash_flows) < 1:
         return np.nan
     
     # Sort by date
     cash_flows.sort(key=lambda x: x[0])
     
-    # Convert to numpy_financial format
+    # Use first cash flow date as base (usually initial investment)
+    base_date = cash_flows[0][0]
+    
+    # If no external flows, just calculate CAGR
+    if len(cash_flows) == 1:
+        days = (final_date - initial_date).days
+        if days <= 0:
+            return np.nan
+        years = days / 365.25
+        total_return = final_nav / initial_nav - 1
+        return (1 + total_return) ** (1 / years) - 1
+    
+    # XIRR calculation with multiple cash flows
     dates = [cf[0] for cf in cash_flows]
     amounts = [cf[1] for cf in cash_flows]
     
-    # Use numpy_financial.irr (requires same-period cash flows)
-    # For XIRR, we use a simplified approach
     try:
-        # Convert dates to years from first date
-        base_date = dates[0]
         years = [(d - base_date).days / 365.25 for d in dates]
         
-        # Use numpy_financial.npv with a guess
         def npv(rate, amounts, years):
             return sum(a / (1 + rate) ** t for a, t in zip(amounts, years))
         
