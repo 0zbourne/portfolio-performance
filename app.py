@@ -100,9 +100,11 @@ st.subheader("NAV vs S&P 500 (rebased to 100)")
 # Rebase both to 100
 plot_nav = (nav / nav.iloc[0] * 100).reset_index()
 plot_nav.columns = ["date", "Portfolio"]
+plot_nav["date"] = pd.to_datetime(plot_nav["date"]).dt.normalize()
 
 sp_rebased = (sp500["close_gbp"] / sp500["close_gbp"].iloc[0] * 100).reset_index()
 sp_rebased.columns = ["date", "S&P 500"]
+sp_rebased["date"] = pd.to_datetime(sp_rebased["date"]).dt.normalize()
 
 # Merge for plotting
 merged = plot_nav.merge(sp_rebased, on="date", how="inner")
