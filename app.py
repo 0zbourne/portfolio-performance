@@ -43,7 +43,9 @@ st.title("Portfolio Performance")
 st.caption("Am I beating the market?")
 
 nav = load_nav()
-flows = load_flows()
+flows = load_flows() 
+if flows is None:     
+    flows = pd.DataFrame(columns=["date", "amount_gbp"])
 
 if nav is None or len(nav) == 0:
     st.error("No NAV data. Run backfill first.")
