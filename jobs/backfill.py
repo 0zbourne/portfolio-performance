@@ -429,6 +429,8 @@ def _download_prices(yf_map: dict[str, tuple[str, str]], start: date, end: date)
     for c in out.columns:
         out[c] = pd.to_numeric(out[c], errors="coerce").astype("float64")
 
+     return out, missing
+
 # ---------------------------
 # Core: Fetch Raw Data
 # ---------------------------
